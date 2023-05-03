@@ -56,7 +56,9 @@ import { createNewUsername } from "backend/auth/username";
 import Logger from "lib/logger";
 import { StorageService } from "init";
 import APP_CONSTANTS from "config/constants";
+import { DB_UTILS } from "@requestly/rq-common";
 
+const { getUserProfilePath } = DB_UTILS;
 const dummyUserImg = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
 /**
  * SignIn with Google in popup window and create profile node
@@ -116,45 +118,27 @@ export async function signUp(name, email, password, refCode, source) {
       })
         .then(() => {
           const authData = getAuthData(result.user);
-          const database = getDatabase();
-          return update(ref(database, getUserProfilePath(authData.uid)), authData)
-            .then(() => {
-              Logger.log("Profile Created Successfully");
 
-              createNewUsername(authData.uid)
-                .then((username) => {
-                  // Do Nothing
-                })
-                .catch((e) => Logger.error(e));
-
-              trackSignupSuccessEvent({
-                auth_provider: AUTH_PROVIDERS.EMAIL,
-                email,
-                ref_code: refCode,
-                uid: authData.uid,
-                email_type,
-                domain,
-                source,
-              });
-
-              return Promise.resolve({
-                status: true,
-                msg: "SignUp Successful",
-              });
+          createNewUsername(authData.uid)
+            .then((username) => {
+              // Do Nothing
             })
-            .catch((e) => {
-              trackSignUpFailedEvent({
-                auth_provider: AUTH_PROVIDERS.EMAIL,
-                email,
-                error: e?.message,
-                source,
-              });
+            .catch((e) => Logger.error(e));
 
-              return Promise.reject({
-                status: false,
-                errorCode: "",
-              });
-            });
+          trackSignupSuccessEvent({
+            auth_provider: AUTH_PROVIDERS.EMAIL,
+            email,
+            ref_code: refCode,
+            uid: authData.uid,
+            email_type,
+            domain,
+            source,
+          });
+
+          return Promise.resolve({
+            status: true,
+            msg: "SignUp Successful",
+          });
         })
         .catch((e) => {
           trackSignUpFailedEvent({
@@ -335,11 +319,7 @@ export async function googleSignIn(callback, MODE, source) {
       }
 
       const authData = getAuthData(result.user);
-      const database = getDatabase();
-      update(ref(database, getUserProfilePath(authData.uid)), authData);
-
       callback && callback.call(null, true);
-
       return authData;
     })
     .catch((err) => {
@@ -383,9 +363,6 @@ export const signInWithEmailLink = async (email, callback) => {
 
     // Update details in db
     const authData = getAuthData(result.user);
-    const database = getDatabase();
-    // firebase.database().ref(getUserProfilePath(authData.uid)).update(authData);
-    update(ref(database, getUserProfilePath(authData.uid)), authData);
 
     //  Analytics - Track event
     trackLoginSuccessEvent({
@@ -458,10 +435,6 @@ export async function getOrUpdateUserSyncState(uid, appMode) {
   }
 
   return syncStatus;
-}
-
-export function getUserProfilePath(userId) {
-  return "users/" + userId + "/profile";
 }
 
 export function getAuthData(user) {
