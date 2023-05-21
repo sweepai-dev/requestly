@@ -16,6 +16,23 @@ import { StorageService } from "init";
 import Logger from "lib/logger";
 import APP_CONSTANTS from "config/constants";
 
+/**
+ * Global declaration augmentation for the Window object.
+ *
+ * @global
+ *
+ * @interface Window
+ *
+ * @property {string | undefined} uid - User's uid
+ *
+ * @property {boolean | undefined} isSyncEnabled - A boolean flag that indicates whether syncing
+ * has been enabled. This can either be true (syncing is enabled), false
+ * (syncing is disabled), or undefined (the sync status has not been set).
+ *
+ * @property {string | undefined} currentlyActiveWorkspaceTeamId - An identifier for the currently
+ * active workspace. This can either be a string value
+ * (indicating the team ID) or undefined (if no workspace or team is currently active - means private is active).
+ */
 declare global {
   interface Window {
     uid: string | undefined;
@@ -23,6 +40,7 @@ declare global {
     currentlyActiveWorkspaceTeamId: string | undefined;
   }
 }
+
 export type SyncType = keyof typeof SYNC_CONSTANTS.SYNC_TYPES;
 export type AppMode = "EXTENSION" | "DESKTOP";
 
