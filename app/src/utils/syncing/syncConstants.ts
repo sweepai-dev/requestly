@@ -1,5 +1,22 @@
-/* Syncing */
-export const SYNC_CONSTANTS = {
+interface SyncTypes {
+  UPDATE_RECORDS: string;
+  REMOVE_RECORDS: string;
+  SESSION_RECORDING_PAGE_CONFIG: string;
+}
+
+interface SyncConstants {
+  SYNC_REMOVE_RECORDS: string;
+  SYNC_UPDATE_RECORDS: string;
+  SYNC_ALL_RECORDS_TO_FIREBASE: string;
+  SYNC_ALL_RECORDS_TO_LOCAL: string;
+  MERGE_AND_SYNC_TO_FIREBASE: string;
+  MERGE_AND_SYNC_TO_FIREBASE_LTS_EXCEEDS_FTS: string;
+  MERGE_AND_SYNC_TO_FIREBASE_LTS_EQUALS_FTS: string;
+  SESSION_PAGE_CONFIG: string;
+  SYNC_TYPES: SyncTypes;
+}
+
+export const SYNC_CONSTANTS: SyncConstants = {
   SYNC_REMOVE_RECORDS: "sync_remove_records",
   SYNC_UPDATE_RECORDS: "sync_update_records",
   SYNC_ALL_RECORDS_TO_FIREBASE: "sync_all_records_to_firebase",
