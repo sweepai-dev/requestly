@@ -193,34 +193,33 @@ const RulesTable = ({
   };
 
   const toggleShareRulesModal = () => {
-    setIsShareRulesModalActive(isShareRulesModalActive ? false : true);
-  };
-  const toggleDeleteConfirmationModal = () => {
-    setIsDeleteConfirmationModalActive(isDeleteConfirmationModalActive ? false : true);
-  };
-
-  const toggleUngroupOrDeleteRulesModal = () => {
-    setIsUngroupOrDeleteRulesModalActive(isUngroupOrDeleteRulesModalActive ? false : true);
-  };
-
-  const openRuleViewerInModal = (rule) => {
-    setRuleToViewInModal(rule);
-    setIsSharedListRuleViewModalActive(true);
-  };
-
-  const setRulesToPopulate = (rules) => {
-    dispatch(actions.updateRulesToPopulate(rules));
-  };
-
-  const getPrettyDesktopRuleTooltipTitle = (ruleType) => {
-    if (ruleType === GLOBAL_CONSTANTS.RULE_TYPES.REDIRECT) {
-      return "This rule may not get executed using extension because the request redirects to a local file that cannot be accessed by the browser.";
-    }
-    return null;
-  };
-
-  const stableSetRulesToPopulate = useCallback(setRulesToPopulate, [dispatch]);
-
+              <a
+                href={`/rules/${record.id}`}
+                onClick={(e) => {
+                  handleRuleNameOnClick(e, record);
+                }}
+              >
+                {recordName}
+                {isDesktopOnlyRule(record) && appMode !== GLOBAL_CONSTANTS.APP_MODES.DESKTOP && (
+                  <InfoTag
+                    title="Desktop App Only"
+                    description={
+                      <>
+                        {getPrettyDesktopRuleTooltipTitle(record.ruleType)}{" "}
+                        <a
+                          className="tooltip-link"
+                          href={LINKS.REQUESTLY_DOWNLOAD_PAGE}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Use this on Desktop App!
+                        </a>
+                      </>
+                    }
+                    tooltipWidth="400px"
+                  />
+                )}
+              </a>
   const setGroupwiseRulesToPopulate = (incomingGroupwiseRules) => {
     dispatch(actions.updateGroupwiseRulesToPopulate(incomingGroupwiseRules));
   };
