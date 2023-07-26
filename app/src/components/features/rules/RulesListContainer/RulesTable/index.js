@@ -316,65 +316,66 @@ const RulesTable = ({
   const handleGroupStatusOnClick = (event, groupData) => {
     event.stopPropagation();
     event.preventDefault();
-    toggleIncomingGroupStatus(groupData);
-    // //Analytics
-
-    if (groupData.status === "Inactive") {
-      trackGroupStatusToggled(true);
-    } else {
-      trackGroupStatusToggled(false);
-    }
-  };
-
-  const ungroupSelectedRulesOnClickHandler = (event) => {
-    event.stopPropagation();
-    ungroupSelectedRules(appMode, selectedRules, user)
-      .then(() => {
-        clearSearch();
-
-        //Unselect all rules
-        unselectAllRules(dispatch);
-
-        //Refresh List
-        updateRulesListRefreshPendingStatus(dispatch, isRulesListRefreshPending);
-      })
-      .then(() => {
-        toast.info("Rules Ungrouped");
-        trackRulesUngrouped();
-      })
-      .catch(() => toast.warn("Please select rules first", { hideProgressBar: true }));
-  };
-
-  const deleteGroupOnClickHandler = (event, groupData) => {
-    event.stopPropagation();
-
-    deleteGroup(appMode, groupData.id, groupwiseRulesToPopulate)
-      .then(async (args) => {
-        if (args && args.err) {
-          if (args.err === "ungroup-rules-first") {
-            setUngroupOrDeleteRulesModalData(groupData);
-            setIsUngroupOrDeleteRulesModalActive(true);
-          }
-
-          return;
-        }
-        updateRulesListRefreshPendingStatus(dispatch, isRulesListRefreshPending);
-        toast.info("Group deleted");
-        trackGroupDeleted();
-      })
-      .catch((err) => toast.warn(err, { hideProgressBar: true }));
-  };
-
-  const renameGroupOnClickHandler = (event, groupData) => {
-    event.stopPropagation();
-    const groupId = groupData.id;
-    dispatch(
-      actions.toggleActiveModal({
-        modalName: "renameGroupModal",
-        newValue: true,
-        newProps: {
-          groupId: { groupId },
-        },
+    render: (recordName, record) => {
+      if (record.objectType === "group") {
+        return (
+          <span>
+            <strong>{recordName}</strong> <i>({getGroupRulesCount(record.id)} Rules)</i>
+          </span>
+        );
+      } else {
+        return (
+          <div
+            style={{
+              overflow: "hidden",
+              wordBreak: "break-word",
+              textOverflow: "ellipsis",
+            }}
+          >
+            <a
+              href={`/rules/${record.id}`}
+              onClick={(e) => {
+                handleRuleNameOnClick(e, record);
+              }}
+            >
+              <span>
+                {recordName}
+                {isDesktopOnlyRule(record) && appMode !== GLOBAL_CONSTANTS.APP_MODES.DESKTOP && (
+                  <InfoTag
+                    title="Desktop App Only"
+                    description={
+                      <>
+                        {getPrettyDesktopRuleTooltipTitle(record.ruleType)}{" "}
+                        <a
+                          className="tooltip-link"
+                          href={LINKS.REQUESTLY_DOWNLOAD_PAGE}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Use this on Desktop App!
+                        </a>
+                      </>
+                    }
+                    tooltipWidth="400px"
+                  />
+                )}
+              </span>
+            </a>
+            <br />
+            <Text
+              type="secondary"
+              style={{
+                overflow: "hidden",
+                wordBreak: "break-word",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {record.description}
+            </Text>
+          </div>
+        );
+      }
+    },
       })
     );
   };
@@ -613,7 +614,8 @@ const RulesTable = ({
                 textOverflow: "ellipsis",
               }}
             >
-              <Link
+              <a
+                href={`/rules/${record.id}`}
                 onClick={(e) => {
                   handleRuleNameOnClick(e, record);
                 }}
@@ -640,7 +642,7 @@ const RulesTable = ({
                     />
                   )}
                 </span>
-              </Link>
+              </a>
               <br />
               <Text
                 type="secondary"
@@ -824,65 +826,66 @@ const RulesTable = ({
           return null;
         }
         // This is a Rule
-
-        if (areActionsEnabled) {
-          return (
-            <div className={hideActionButtons ? "rule-action-buttons not-visible" : "rule-action-buttons"}>
-              <ReactHoverObserver>
-                {({ isHovering }) => (
-                  <Space>
-                    {isFavouritingAllowed && (
-                      <Text
-                        type={isHovering ? "primary" : "secondary"}
-                        className={`cursor-pointer ${isPinned ? "show-record" : ""}`}
-                      >
-                        <Tooltip title={isPinned ? "Unpin Rule" : "Pin Rule"}>
-                          <Tag onClick={(e) => favouriteIconOnClickHandler(e, record)}>
-                            {record.isFavourite ? (
-                              <PushpinFilled
-                                style={{
-                                  padding: "5px 0px",
-                                  fontSize: "12px",
-                                  cursor: "pointer",
-                                }}
-                                className="fix-primary2-color"
-                              />
-                            ) : (
-                              <PushpinOutlined
-                                style={{
-                                  padding: "5px 0px",
-                                  fontSize: "12px",
-                                  cursor: "pointer",
-                                }}
-                              />
-                            )}
-                          </Tag>
-                        </Tooltip>
-                      </Text>
-                    )}
-                    <Text type={isHovering ? "primary" : "secondary"} style={{ cursor: "pointer" }}>
-                      <Tooltip title="Share with your Teammates">
-                        <Tag onClick={(e) => shareIconOnClickHandler(e, record)}>
-                          <UsergroupAddOutlined />
-                        </Tag>
-                      </Tooltip>
-                    </Text>
-                    <Text type={isHovering ? "primary" : "secondary"} style={{ cursor: "pointer" }}>
-                      <Tooltip title="Duplicate Rule">
-                        <Tag onClick={(e) => copyIconOnClickHandler(e, record)}>
-                          <CopyOutlined
-                            style={{
-                              padding: "5px 0px",
-                              fontSize: "12px",
-                              cursor: "pointer",
-                            }}
-                          />
-                        </Tag>
-                      </Tooltip>
-                    </Text>
-                    <Text type={isHovering ? "primary" : "secondary"} style={{ cursor: "pointer" }}>
-                      <Tooltip title="Delete Rule">
-                        <Tag onClick={(e) => deleteIconOnClickHandler(e, record)}>
+render: (recordName, record) => {
+  if (record.objectType === "group") {
+    return (
+      <span>
+        <strong>{recordName}</strong> <i>({getGroupRulesCount(record.id)} Rules)</i>
+      </span>
+    );
+  } else {
+    return (
+      <div
+        style={{
+          overflow: "hidden",
+          wordBreak: "break-word",
+          textOverflow: "ellipsis",
+        }}
+      >
+        <Link
+          to={`/rules/${record.id}`}
+          onClick={(e) => {
+            handleRuleNameOnClick(e, record);
+          }}
+        >
+          <span>
+            {recordName}
+            {isDesktopOnlyRule(record) && appMode !== GLOBAL_CONSTANTS.APP_MODES.DESKTOP && (
+              <InfoTag
+                title="Desktop App Only"
+                description={
+                  <>
+                    {getPrettyDesktopRuleTooltipTitle(record.ruleType)}{" "}
+                    <a
+                      className="tooltip-link"
+                      href={LINKS.REQUESTLY_DOWNLOAD_PAGE}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Use this on Desktop App!
+                    </a>
+                  </>
+                }
+                tooltipWidth="400px"
+              />
+            )}
+          </span>
+        </Link>
+        <br />
+        <Text
+          type="secondary"
+          style={{
+            overflow: "hidden",
+            wordBreak: "break-word",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {record.description}
+        </Text>
+      </div>
+    );
+  }
+},
                           <DeleteOutlined
                             style={{
                               padding: "5px 0px",
