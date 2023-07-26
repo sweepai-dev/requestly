@@ -129,54 +129,49 @@ const RulesTable = ({
   rules: rulesFromProps,
   groups: groupsFromProps,
   options,
-  headerTitle,
-  toolBarRender,
-}) => {
-  const navigate = useNavigate();
-  // Component State
-  const [isSharedListRuleViewerModalActive, setIsSharedListRuleViewModalActive] = useState(false);
-  const [ruleToViewInModal, setRuleToViewInModal] = useState(false);
-
-  const [isShareRulesModalActive, setIsShareRulesModalActive] = useState(false);
-
-  const [isDeleteConfirmationModalActive, setIsDeleteConfirmationModalActive] = useState(false);
-  const [isUngroupOrDeleteRulesModalActive, setIsUngroupOrDeleteRulesModalActive] = useState(false);
-  const [isDuplicateRuleModalActive, setIsDuplicateRuleModalActive] = useState(false);
-  const [ungroupOrDeleteRulesModalData, setUngroupOrDeleteRulesModalData] = useState(null);
-  const [ruleToDelete, setRuleToDelete] = useState([]);
-  const [ruleIdToDelete, setRuleIdToDelete] = useState([]);
-  const [ruleToDuplicate, setRuleToDuplicate] = useState(null);
-  const [size, setSize] = useState(window.innerWidth);
-  const [sharedListModalRuleIDs, setSharedListModalRuleIDs] = useState([]);
-  const [expandedGroups, setExpandedGroups] = useState([UNGROUPED_GROUP_ID]);
-  const [isGroupsStateUpdated, setIsGroupsStateUpdated] = useState(false);
-  const [startFirstRuleWalkthrough, setStartFirstRuleWalkthrough] = useState(false);
-  const [startFifthRuleWalkthrough, setStartFifthRuleWalkthrough] = useState(false);
-
-  //Global State
-  const dispatch = useDispatch();
-  const user = useSelector(getUserAuthDetails);
-  const userAttributes = useSelector(getUserAttributes);
-  const searchByRuleName = useSelector(getRulesSearchKeyword);
-  const rulesData = useSelector(getAllRules);
-  const rules = rulesFromProps ? rulesFromProps : rulesData;
-  const groupsData = useSelector(getAllGroups);
-  const groups = groupsFromProps ? groupsFromProps : groupsData;
-  const rulesToPopulate = useSelector(getRulesToPopulate);
-  const groupwiseRulesToPopulate = useSelector(getGroupwiseRulesToPopulate);
-  const appMode = useSelector(getAppMode);
-  const isRulesListRefreshPending = useSelector(getIsRefreshRulesPending);
-  const rulesSelection = useSelector(getRulesSelection);
-  const currentlyActiveWorkspace = useSelector(getCurrentlyActiveWorkspace);
-  const isWorkspaceMode = useSelector(getIsWorkspaceMode);
-  const isMiscTourCompleted = useSelector(getIsMiscTourCompleted);
-  const groupingAndRuleActivationExp = useFeatureValue("grouping_and_rule_activation", null);
-
-  const selectedRules = getSelectedRules(rulesSelection);
-
-  const isRemoveFromGroupDisabled = useMemo(
-    () => rules.filter((rule) => rulesSelection[rule.id]).every((rule) => rule.groupId === UNGROUPED_GROUP_ID),
-    [rules, rulesSelection]
+  return (
+    <Link
+      to={`/rules/${record.id}`}
+      style={{
+        overflow: "hidden",
+        wordBreak: "break-word",
+        textOverflow: "ellipsis",
+      }}
+    >
+      <span>
+        {recordName}
+        {isDesktopOnlyRule(record) && appMode !== GLOBAL_CONSTANTS.APP_MODES.DESKTOP && (
+          <InfoTag
+            title="Desktop App Only"
+            description={
+              <>
+                {getPrettyDesktopRuleTooltipTitle(record.ruleType)}{" "}
+                <a
+                  className="tooltip-link"
+                  href={LINKS.REQUESTLY_DOWNLOAD_PAGE}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Use this on Desktop App!
+                </a>
+              </>
+            }
+            tooltipWidth="400px"
+          />
+        )}
+      </span>
+      <br />
+      <Text
+        type="secondary"
+        style={{
+          overflow: "hidden",
+          wordBreak: "break-word",
+          textOverflow: "ellipsis",
+        }}
+      >
+        {record.description}
+      </Text>
+    </Link>
   );
 
   const showGroupPinIcon = isFeatureCompatible(FEATURES.EXTENSION_GROUP_PIN_ICON);
@@ -613,8 +608,10 @@ const RulesTable = ({
                 textOverflow: "ellipsis",
               }}
             >
-              <Link
+              <a
+                href={`/rules/${record.id}`}
                 onClick={(e) => {
+                  e.preventDefault();
                   handleRuleNameOnClick(e, record);
                 }}
               >
@@ -640,7 +637,7 @@ const RulesTable = ({
                     />
                   )}
                 </span>
-              </Link>
+              </a>
               <br />
               <Text
                 type="secondary"
